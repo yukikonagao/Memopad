@@ -2,7 +2,6 @@ package sample.application.memopad;
 
 import java.text.DateFormat;
 import java.util.Date;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.ContentValues;
@@ -18,10 +17,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.text.TextWatcher;//8/4追加
+
+
 
 
 public class MemopadActivity extends Activity {
     /** Called when the activity is first created. */
+	
+		boolean memoChanged = false;//8/5追加
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,11 +34,28 @@ public class MemopadActivity extends Activity {
        
     EditText et = (EditText) this.findViewById(R.id.editText1);
     SharedPreferences pref = this.getSharedPreferences("MemoPrefs", MODE_PRIVATE);
+    	memoChanged = pref.getBoolean("memoChanged", false);//8/5追加
     et.setText(pref.getString("memo",""));
     et.setSelection(pref.getInt("cusor",0));
-             
-     }
-
+    
+    //8/5追加 ↓     
+   TextWatcher tw = new TextWatcher(){
+	   @Override
+	   public void afterTextChanged(Editable s) {
+		   
+	   }
+	 //8/5追加↑
+	   @Override
+	   public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+	   }
+	   
+	   @Override
+	   public void onTextChanged(CharSequence s, int start, int before, int count) {
+		   memoChange = true;
+	   }
+		   }
+     };
+     et.addTextChangeListener(tw);
 
 
 	@Override
@@ -42,6 +64,7 @@ public class MemopadActivity extends Activity {
     	EditText et = (EditText) this.findViewById(R.id.editText1);
     	SharedPreferences pref = this.getSharedPreferences("MemoPrefs", MODE_PRIVATE);
     	SharedPreferences.Editor editor = pref.edit();
+    	editor.putBoolean("memoChanged", memoChanged);//8/5追加
     	editor.putString("memo", et.getText().toString());
     	editor.putInt("cursor",Selection.getSelectionStart(et.getText()));
     	/*
@@ -64,6 +87,7 @@ public class MemopadActivity extends Activity {
 			}
 			else{
 				title = memo.substring(0, Math.min(memo.indexOf("\n"),20));
+				memoChanged = false;//8/5追加。ここでいいのか？
 			}
 			
 			String ts = DateFormat.getDateTimeInstance().format(new Date());
@@ -90,6 +114,7 @@ public class MemopadActivity extends Activity {
 		switch(requestCode){
 		case 0:
 			et.setText(data.getStringExtra("text"));
+			memoChange = false;//8/5追加
 			break;
 		}
 		}
@@ -112,10 +137,12 @@ public class MemopadActivity extends Activity {
 			this.saveMemo();//保存を押したら、保存される。
 			break;//上記の（saveMemo）が出たら、そこから抜ける。
 		case R.id.menu_open:
+				if(memoChanged) saveMemo();//8/5追加
 			Intent i = new Intent(this, MemoList.class);
 			this.startActivityForResult(i,0);//以前作成したメモを呼び出す。
 			break;
 		case R.id.menu_new:
+				if(memoChanged) sameMemo();//8/5追加
 			et.setText("");//新しいメモを作るので、何もないメモ帳が表示される。
 			break;
 		}

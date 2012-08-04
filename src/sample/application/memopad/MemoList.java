@@ -8,6 +8,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.widget.SimpleCursorAdapter;
 import android.content.Intent;
+import android.view.MenuInflater;//8/4’Ç‰Á
+import android.widget.AdapterView.AdapterContextMenuInfo;//8/4’Ç‰Á
+import android.app.AlertDialog;//8/4’Ç‰Á
+import android.content.DialogInterface;//8/4’Ç‰Á
 
 public class MemoList extends ListActivity {
 	static final String[] cols = {"title","memo",android.provider.BaseColumns._ID,};
